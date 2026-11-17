@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0b0b">
+  <meta name="description" content="TRAINTRACK — acompanhe seus treinos, sequências, fotos e estatísticas.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <title>TRAINTRACK</title>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand-lockup">
+        <div class="brand-mark">T</div>
+        <div>
+          <div class="brand-name">TRAIN<span>TRACK</span></div>
+          <div class="brand-subtitle">CONSISTÊNCIA EM MOVIMENTO</div>
+        </div>
+      </div>
+      <button class="icon-button" id="installBtn" type="button" aria-label="Instalar aplicativo" title="Instalar aplicativo" hidden>
+        <span aria-hidden="true">↓</span>
+      </button>
+    </header>
+
+    <main id="mainContent" tabindex="-1">
+      <section class="view active" id="view-home" aria-labelledby="homeTitle">
+        <div class="section-heading home-heading">
+          <div>
+            <p class="eyebrow" id="todayLabel">SEU PROGRESSO COMEÇA HOJE</p>
+            <h1 id="homeTitle">Vamos treinar.</h1>
+            <p class="muted" id="fullDate"></p>
+          </div>
+          <div class="year-chip" id="yearChip"></div>
+        </div>
+
+        <div class="hero-card">
+          <div class="hero-copy">
+            <span class="eyebrow dark-eyebrow">REGISTRO DE HOJE</span>
+            <h2 id="heroTitle">Fez seu treino?</h2>
+            <p id="heroDescription">Registre com um toque e acompanhe sua consistência.</p>
+            <button class="primary-button" id="markTodayBtn" type="button">✓ &nbsp; TREINO CONCLUÍDO</button>
+          </div>
+          <div class="hero-symbol" aria-hidden="true"><span>TT</span><i></i></div>
+        </div>
+
+        <div class="metric-grid">
+          <article class="metric-card">
+            <div class="metric-icon">↗</div>
+            <div class="metric-label">SEQUÊNCIA ATUAL</div>
+            <div class="metric-value"><span id="currentStreak">0</span><small> dias</small></div>
+            <div class="metric-foot" id="streakModeLabel">Dias consecutivos</div>
+          </article>
+          <article class="metric-card">
+            <div class="metric-icon">★</div>
+            <div class="metric-label">MELHOR SEQUÊNCIA</div>
+            <div class="metric-value"><span id="bestStreak">0</span><small> dias</small></div>
+            <div class="metric-foot">Seu recorde pessoal</div>
+          </article>
+          <article class="metric-card">
+            <div class="metric-icon">▦</div>
+            <div class="metric-label">TREINOS NO MÊS</div>
+            <div class="metric-value"><span id="monthCount">0</span><small> dias</small></div>
+            <div class="metric-foot" id="monthProgressLabel">0% da meta planejada</div>
+          </article>
+          <article class="metric-card">
+            <div class="metric-icon">◆</div>
+            <div class="metric-label">TOTAL NO ANO</div>
+            <div class="metric-value"><span id="yearCount">0</span><small> dias</small></div>
+            <div class="metric-foot" id="yearLabel"></div>
+          </article>
+        </div>
+
+        <div class="content-card compact-card">
+          <div class="card-heading">
+            <div><p class="eyebrow">VISÃO GERAL</p><h3 id="homeMonthTitle">Este mês</h3></div>
+            <button class="text-button" data-go="calendar" type="button">Ver calendário <span>→</span></button>
+          </div>
+          <div class="mini-week" id="miniWeek" aria-label="Últimos sete dias"></div>
+          <div class="progress-line-wrap">
+            <div class="progress-caption"><span>Frequência planejada</span><strong id="homePercent">0%</strong></div>
+            <div class="progress-track"><div class="progress-fill" id="homeProgressFill"></div></div>
+          </div>
+        </div>
+
+        <div class="section-inline-heading"><h3>Atalhos</h3></div>
+        <div class="shortcut-grid">
+          <button class="shortcut-card" data-go="progress" type="button"><span class="shortcut-icon">▣</span><span><strong>Minha evolução</strong><small>Fotos do mês</small></span><b>→</b></button>
+          <button class="shortcut-card" data-go="stats" type="button"><span class="shortcut-icon">▥</span><span><strong>Estatísticas</strong><small>Seus resultados</small></span><b>→</b></button>
+        </div>
+      </section>
+
+      <section class="view" id="view-calendar" aria-labelledby="calendarTitle">
+        <div class="section-heading">
+          <div><p class="eyebrow">SEU HISTÓRICO</p><h1 id="calendarTitle">Calendário</h1><p class="muted">Toque em um dia para registrar ou remover um treino.</p></div>
+        </div>
+        <div class="content-card calendar-card">
+          <div class="calendar-toolbar">
+            <button class="round-button" id="prevMonth" type="button" aria-label="Mês anterior">‹</button>
+            <h2 id="calendarMonthTitle">Mês de 2026</h2>
+            <button class="round-button" id="nextMonth" type="button" aria-label="Próximo mês">›</button>
+          </div>
+          <div class="calendar-grid" id="calendarGrid">
+            <div class="weekday">D</div><div class="weekday">S</div><div class="weekday">T</div><div class="weekday">Q</div><div class="weekday">Q</div><div class="weekday">S</div><div class="weekday">S</div>
+          </div>
+          <div class="calendar-legend"><span><i class="legend-dot trained"></i> Treinei</span><span><i class="legend-dot today"></i> Hoje</span><span><i class="legend-dot planned"></i> Dia planejado</span></div>
+        </div>
+        <div class="metric-grid two-metrics">
+          <article class="metric-card"><div class="metric-label">TREINOS NO MÊS</div><div class="metric-value"><span id="calendarMonthCount">0</span><small> dias</small></div></article>
+          <article class="metric-card"><div class="metric-label">FREQUÊNCIA</div><div class="metric-value"><span id="calendarMonthPercent">0%</span></div></article>
+        </div>
+        <div class="info-note"><strong>Como registrar:</strong> dias amarelos indicam treino concluído. Você também pode tocar em uma data passada para corrigir seu histórico.</div>
+      </section>
+
+      <section class="view" id="view-progress" aria-labelledby="progressTitle">
+        <div class="section-heading">
+          <div><p class="eyebrow">ACOMPANHE AS MUDANÇAS</p><h1 id="progressTitle">Minha evolução</h1><p class="muted">Guarde duas fotos por mês e compare lado a lado.</p></div>
+        </div>
+        <div class="content-card">
+          <div class="calendar-toolbar photo-toolbar">
+            <button class="round-button" id="prevPhotoMonth" type="button" aria-label="Mês anterior">‹</button>
+            <h2 id="photoMonthTitle">Mês de 2026</h2>
+            <button class="round-button" id="nextPhotoMonth" type="button" aria-label="Próximo mês">›</button>
+          </div>
+          <div class="photo-pair">
+            <article class="photo-slot">
+              <div class="photo-slot-heading"><span>01</span><div><strong>INÍCIO DO MÊS</strong><small id="beforeDate">Nenhuma foto</small></div></div>
+              <div class="photo-frame" id="beforeFrame"><div class="photo-placeholder"><span>＋</span><small>Adicionar foto</small></div></div>
+              <div class="photo-actions"><button class="outline-button" id="beforeUpload" type="button">Adicionar foto</button><button class="remove-photo" id="beforeRemove" type="button" hidden aria-label="Excluir foto inicial">×</button></div>
+              <input type="file" id="beforeInput" accept="image/*" capture="environment" hidden>
+            </article>
+            <article class="photo-slot">
+              <div class="photo-slot-heading"><span>02</span><div><strong>FINAL DO MÊS</strong><small id="afterDate">Nenhuma foto</small></div></div>
+              <div class="photo-frame" id="afterFrame"><div class="photo-placeholder"><span>＋</span><small>Adicionar foto</small></div></div>
+              <div class="photo-actions"><button class="outline-button" id="afterUpload" type="button">Adicionar foto</button><button class="remove-photo" id="afterRemove" type="button" hidden aria-label="Excluir foto final">×</button></div>
+              <input type="file" id="afterInput" accept="image/*" capture="environment" hidden>
+            </article>
+          </div>
+          <div class="photo-privacy"><span>▣</span><p><strong>Suas fotos ficam neste aparelho.</strong><br>Elas não são enviadas para uma rede social ou servidor.</p></div>
+        </div>
+        <div class="info-note">Dica: tente tirar as fotos em condições parecidas de iluminação, distância e postura. A comparação é apenas um registro visual, não uma avaliação de saúde.</div>
+      </section>
+
+      <section class="view" id="view-stats" aria-labelledby="statsTitle">
+        <div class="section-heading">
+          <div><p class="eyebrow">DADOS REAIS DO SEU HISTÓRICO</p><h1 id="statsTitle">Estatísticas</h1><p class="muted">Veja sua consistência mês a mês.</p></div>
+        </div>
+        <div class="content-card stats-year-card">
+          <div class="calendar-toolbar"><button class="round-button" id="prevYear" type="button" aria-label="Ano anterior">‹</button><h2 id="statsYearTitle">2026</h2><button class="round-button" id="nextYear" type="button" aria-label="Próximo ano">›</button></div>
+          <div class="annual-summary">
+            <div><span class="eyebrow">TOTAL NO ANO</span><strong id="annualTotal">0</strong><small>dias treinados</small></div>
+            <div><span class="eyebrow">MÉDIA MENSAL</span><strong id="annualAverage">0</strong><small>dias por mês</small></div>
+          </div>
+          <div class="chart-title-row"><h3>Treinos por mês</h3><span class="chart-unit">DIAS</span></div>
+          <div class="bar-chart" id="annualChart" aria-label="Gráfico de treinos por mês"></div>
+          <div class="best-month-row"><span>Melhor mês</span><strong id="bestMonth">—</strong></div>
+          <div class="best-month-row"><span>Maior sequência no ano</span><strong id="annualBestStreak">0 dias</strong></div>
+        </div>
+        <div class="content-card monthly-report-card">
+          <div class="card-heading"><div><p class="eyebrow">DETALHAMENTO</p><h3>Resumo mensal</h3></div></div>
+          <div class="report-list" id="monthlyReportList"></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-settings" aria-labelledby="settingsTitle">
+        <div class="section-heading"><div><p class="eyebrow">PERSONALIZE O APP</p><h1 id="settingsTitle">Configurações</h1><p class="muted">Ajuste sua rotina e proteja seu histórico.</p></div></div>
+        <div class="content-card settings-card">
+          <div class="settings-section"><div><p class="eyebrow">DIAS DE TREINO</p><h3>Minha rotina semanal</h3><p class="muted small">Selecione os dias em que pretende treinar.</p></div>
+            <div class="weekday-pills" id="plannedDays"><button data-day="1" type="button">SEG</button><button data-day="2" type="button">TER</button><button data-day="3" type="button">QUA</button><button data-day="4" type="button">QUI</button><button data-day="5" type="button">SEX</button><button data-day="6" type="button">SÁB</button><button data-day="0" type="button">DOM</button></div>
+          </div>
+          <div class="settings-divider"></div>
+          <div class="settings-section"><div><p class="eyebrow">SEQUÊNCIA</p><h3>Como contar minha sequência?</h3><p class="muted small">Dias de descanso planejados podem ser ignorados.</p></div>
+            <label class="select-wrap"><select id="streakMode"><option value="calendar">Dias consecutivos do calendário</option><option value="planned">Somente dias planejados</option></select></label>
+          </div>
+          <div class="settings-divider"></div>
+          <div class="settings-section"><div><p class="eyebrow">LEMBRETES</p><h3>Hora de treinar</h3><p class="muted small">O aviso dentro do app funciona quando ele está aberto. Para alertas confiáveis com o app fechado, use o calendário do celular.</p></div>
+            <div class="reminder-controls"><label class="switch-row"><span>Ativar aviso no app</span><input type="checkbox" id="reminderEnabled"><i></i></label><label class="time-row">Horário <input type="time" id="reminderTime" value="17:30"></label><button class="outline-button full-width" id="notificationPermission" type="button">Permitir notificações</button><button class="outline-button full-width" id="exportReminder" type="button">Baixar lembrete para o calendário (.ics)</button><p class="tiny-muted" id="notificationStatus">Configure os dias de treino e o horário acima.</p></div>
+          </div>
+          <div class="settings-divider"></div>
+          <div class="settings-section"><div><p class="eyebrow">SEUS DADOS</p><h3>Backup e privacidade</h3><p class="muted small">Os registros e fotos ficam armazenados localmente neste navegador.</p></div>
+            <div class="backup-actions"><button class="outline-button full-width" id="exportBackup" type="button">Exportar backup</button><label class="outline-button full-width file-label">Importar backup<input type="file" id="importBackup" accept="application/json,.json" hidden></label><button class="danger-button full-width" id="clearData" type="button">Apagar todos os dados</button></div>
+          </div>
+        </div>
+        <div class="info-note warning-note"><strong>Importante:</strong> se limpar os dados do navegador, trocar de aparelho ou desinstalar o navegador, você pode perder seu histórico. Exporte um backup regularmente. As fotos não são enviadas para a nuvem.</div>
+        <div class="app-version">TRAINTRACK · VERSÃO 1.0 · FEITO PARA SUA CONSISTÊNCIA</div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Navegação principal">
+      <button class="nav-item active" data-view="home" type="button"><span class="nav-icon">⌂</span><small>Início</small></button>
+      <button class="nav-item" data-view="calendar" type="button"><span class="nav-icon">▦</span><small>Calendário</small></button>
+      <button class="nav-item" data-view="progress" type="button"><span class="nav-icon">▣</span><small>Evolução</small></button>
+      <button class="nav-item" data-view="stats" type="button"><span class="nav-icon">▥</span><small>Dados</small></button>
+      <button class="nav-item" data-view="settings" type="button"><span class="nav-icon">⚙</span><small>Ajustes</small></button>
+    </nav>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="modal-backdrop" id="confirmModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+      <div class="modal-mark">!</div><h2 id="confirmTitle">Confirmar ação</h2><p id="confirmMessage">Deseja continuar?</p>
+      <div class="modal-actions"><button class="outline-button" id="cancelConfirm" type="button">Cancelar</button><button class="danger-button" id="acceptConfirm" type="button">Confirmar</button></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
