@@ -10,7 +10,8 @@ const DEFAULTS = {
   reminderEnabled: false,
   reminderTime: '17:30',
   lastRemindedDate: null,
-  photos: {}
+  photos: {},
+  savedVideos: []
 };
 
 let db;
@@ -66,7 +67,8 @@ function mergeState(saved) {
     ...saved,
     attendance: Array.isArray(saved.attendance) ? [...new Set(saved.attendance.filter(validDateKey))].sort() : [],
     plannedDays: Array.isArray(saved.plannedDays) ? [...new Set(saved.plannedDays.map(Number).filter(n => Number.isInteger(n) && n >= 0 && n <= 6))] : [...DEFAULTS.plannedDays],
-    photos: saved.photos && typeof saved.photos === 'object' ? saved.photos : {}
+    photos: saved.photos && typeof saved.photos === 'object' ? saved.photos : {},
+    savedVideos: Array.isArray(saved.savedVideos) ? saved.savedVideos.filter(item => item && typeof item.id === 'string' && /^[a-zA-Z0-9_-]{11}$/.test(item.id)).slice(0, 30) : []
   };
 }
 
@@ -424,7 +426,7 @@ function renderSettings() {
 }
 
 function renderAll() {
-  renderHome(); renderCalendar(); renderPhotoMonth(); renderStats(); renderSettings();
+  renderHome(); renderCalendar(); renderPhotoMonth(); renderStats(); renderSettings(); renderMotivation();
 }
 
 function switchView(name) {
@@ -562,10 +564,75 @@ async function savePhoto(slot, file) {
 
 function escICS(text) { return text.replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/,/g,'\\,').replace(/;/g,'\\;'); }
 
+
+const FEATURED_MOTIVATION_VIDEOS = [
+  { id: 'G3GwBMe_a_k', title: 'Motivação para treinar', description: 'Uma mensagem para ouvir antes de ir à academia.', channel: 'Nando Pinheiro' },
+  { id: 'froUrj5I_S0', title: 'Seus erros te deixam mais forte', description: 'Motivação bodybuilding sobre persistência e superação.', channel: 'Apolo Motivação' },
+  { id: '_SLvY03R80g', title: 'Disciplina gera transformação', description: 'Um incentivo para sair da zona de conforto e continuar.', channel: 'Marcelo Zanardo' },
+  { id: 'eQofu-TA-T0', title: 'Persistência, consistência e disciplina', description: 'Uma mensagem para manter o foco nos dias difíceis.', channel: 'zyzz Motivation' },
+  { id: 'LzXTDTx0h6M', title: 'Como ter disciplina e motivação para treinar', description: 'Mentalidade, paciência e consistência no longo prazo.', channel: 'Theus Treinos' }
+];
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+}
+
+function youtubeVideoId(rawUrl) {
+  try {
+    const url = new URL(rawUrl);
+    if (!['youtube.com','www.youtube.com','m.youtube.com','youtu.be','www.youtu.be','youtube-nocookie.com','www.youtube-nocookie.com'].includes(url.hostname)) return null;
+    let id = url.hostname.includes('youtu.be') ? url.pathname.slice(1).split('/')[0] : (url.searchParams.get('v') || url.pathname.match(/\/(?:embed|shorts)\/([a-zA-Z0-9_-]{11})/)?.[1]);
+    return id && /^[a-zA-Z0-9_-]{11}$/.test(id) ? id : null;
+  } catch { return null; }
+}
+
+function renderMotivation() {
+  const list = $('motivationVideoList');
+  if (!list) return;
+  const custom = state.savedVideos.map(video => ({...video, custom:true}));
+  const videos = [...FEATURED_MOTIVATION_VIDEOS, ...custom];
+  list.innerHTML = videos.map((video, index) => `
+    <article class="motivation-video-card">
+      <div class="motivation-video-frame">
+        <iframe src="https://www.youtube-nocookie.com/embed/${video.id}" title="${escapeHTML(video.title)}" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+      </div>
+      <div class="motivation-video-info">
+        <div><span class="eyebrow">${video.custom ? 'ADICIONADO POR VOCÊ' : `VÍDEO ${String(index + 1).padStart(2,'0')}`}</span><h3>${escapeHTML(video.title)}</h3><p>${escapeHTML(video.description || 'Vídeo salvo na sua playlist.')}</p><small>${escapeHTML(video.channel || 'YouTube')}</small></div>
+        <div class="motivation-video-actions"><a class="outline-button" href="https://www.youtube.com/watch?v=${video.id}" target="_blank" rel="noopener noreferrer">Abrir no YouTube ↗</a>${video.custom ? `<button class="remove-photo remove-saved-video" type="button" data-video-id="${video.id}" aria-label="Remover vídeo">×</button>` : ''}</div>
+      </div>
+    </article>`).join('');
+  if (!videos.length) list.innerHTML = '<p class="muted">Nenhum vídeo adicionado ainda.</p>';
+}
+
+async function addMotivationVideo(event) {
+  event.preventDefault();
+  const input = $('customVideoUrl');
+  const id = youtubeVideoId(input.value.trim());
+  if (!id) return showToast('Cole um link válido de vídeo do YouTube.');
+  if (FEATURED_MOTIVATION_VIDEOS.some(video => video.id === id) || state.savedVideos.some(video => video.id === id)) {
+    input.value = '';
+    return showToast('Esse vídeo já está na sua lista.');
+  }
+  state.savedVideos.unshift({ id, title: 'Vídeo salvo do YouTube', description: 'Adicionado por você.', channel: 'YouTube' });
+  state.savedVideos = state.savedVideos.slice(0, 30);
+  await writeState();
+  input.value = '';
+  renderMotivation();
+  showToast('Vídeo adicionado à sua playlist.');
+}
+
 function bindEvents() {
   document.querySelectorAll('.nav-item').forEach(button => button.addEventListener('click', () => switchView(button.dataset.view)));
   document.querySelectorAll('[data-go]').forEach(button => button.addEventListener('click', () => switchView(button.dataset.go)));
   $('markTodayBtn').addEventListener('click', () => toggleAttendance(dateKey(new Date())));
+  $('addVideoForm').addEventListener('submit', addMotivationVideo);
+  $('motivationVideoList').addEventListener('click', async event => {
+    const button = event.target.closest('.remove-saved-video');
+    if (!button) return;
+    const id = button.dataset.videoId;
+    state.savedVideos = state.savedVideos.filter(video => video.id !== id);
+    await writeState(); renderMotivation(); showToast('Vídeo removido da sua playlist.');
+  });
   $('prevMonth').addEventListener('click', () => { calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth()-1, 1); renderCalendar(); });
   $('nextMonth').addEventListener('click', () => { const next = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth()+1, 1); const max = new Date(new Date().getFullYear(), new Date().getMonth(), 1); if (next <= max) { calendarMonth = next; renderCalendar(); } });
   $('prevPhotoMonth').addEventListener('click', () => { photoMonth = new Date(photoMonth.getFullYear(), photoMonth.getMonth()-1, 1); renderPhotoMonth(); });
